@@ -1,0 +1,52 @@
+networks:
+  reverse-proxy:
+    external: true
+  crowdsec:
+    external: true
+
+volumes:
+  public: {}
+
+x-general: &general 
+  # Безопасность
+  security_opt: ["no-new-privileges:true"]
+  tmpfs: ["/tmp:rw,noexec,nosuid"]
+  # Настройки контейнера
+  restart: always
+  environment:
+    TZ: Europe/Moscow
+
+services:
+  address-list-maker-web:
+    <<: *general
+    container_name: address-list-maker-web
+    image: aligotr/http-file-server:latest
+    networks:
+      - reverse-proxy
+    volumes:
+      - public:${WEB_PATH}/:ro
+    environment:
+      BASE_URL: ip.aligotr.ru
+
+  address-list-maker:
+    <<: *general
+    container_name: address-list-maker
+    image: aligotr/address-list-maker:latest
+    networks:
+      - crowdsec
+    volumes:
+      - public:${WEB_PATH}/:rw
+    environment:
+      LISTS_PATH: ${WEB_PATH}
+      PLATFORMS: plaintext,proxmox,mikrotik
+      CROWDSEC_ENABLE: true
+      CROWDSEC_CRON: "0,14,28,42 * * * *"
+      CROWDSEC_START_DELAY: 11
+      CROWDSEC_API_URL: http://crowdsec:8080/
+      CROWDSEC_API_KEY: 123456789
+      CROWDSEC_ORIGINS: CAPI,crowdsec
+      # CROWDSEC_SCENARIOS_CONTAINING:
+      # CROWDSEC_SCENARIOS_NOT_CONTAINING:
+      GEOIP_ENABLE: true
+      GEOIP_CRON: "0 21 * * 6"
+      COUNTRIES: ru

@@ -1,0 +1,30 @@
+networks:
+  reverse-proxy:
+    external: true
+  crowdsec:
+    external: true
+
+volumes:
+  public: {}
+
+x-general: &general
+  # Безопасность
+  security_opt: ["no-new-privileges:true"]
+  tmpfs: ["/tmp:rw,noexec,nosuid"]
+  # Настройки контейнера
+  restart: always
+  environment:
+    TZ: Europe/Moscow
+
+services:
+  address-list-maker-dev:
+    <<: *general
+    container_name: address-list-maker-dev
+    image: aligotr/address-list-maker-dev:latest
+    networks:
+      - crowdsec
+    volumes:
+      - /srv/address-list-maker/docker-dev/app/:/srv/app/:rw
+    environment:
+      CROWDSEC_API_KEY: 1234567890
+      GEOIP_ENABLE: false

@@ -8,13 +8,15 @@
 Примеры выходных файлов:
 `ipdeny_ru_v4.zone`, `ipdeny_ru_proxmox_v4.sh`, `crowdsec_plus_mikrotik_v4.rsc`.
 
-## Proxmox - Cron
+## Примеры использования
+
+### Proxmox - Cron
 
 ```cron
 00 05 * * 5 root wget -O - https://mydomain.local/geoip/ipdeny_ru_proxmox_v4.sh | sh > /var/log/geoip-ru.log 2>&1
 ```
 
-## Mikrotik - Script
+### Mikrotik - Script
 
 ```routeros
 :local name "[crowdsec]"
